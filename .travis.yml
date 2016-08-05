@@ -2,15 +2,12 @@ require: sudo
 language: node_js
 services:
   - docker
+env:
+  - DOCKER_IMAGE=prodest/api-cloud
 script: 
-  docker build -t prodest/api-cloud .
+  docker build -t $DOCKER_IMAGE .
 deploy:
   provider: script
-  script: 
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push prodest/api-cloud
-      - (git clone https://github.com/prodest/gerencio-upgrade)
-      - (cd gerencio-upgrade && npm install)
-      - (cd gerencio-upgrade && node ./gerencio-upgrade $SERVICENAME 40000)
+  script: ./travis
   on:
     branch: master
