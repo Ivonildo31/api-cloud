@@ -9,6 +9,6 @@ script:
 deploy:
   provider: script
   skip_cleanup: true
-  script: travis.sh
+  script: /bin/sh travis.sh
   on:
     branch: master
