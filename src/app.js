@@ -15,7 +15,7 @@ let app = express();
 const proxy = httpProxy.createProxyServer( {} );
 
 app.use( ( req, res ) => {
-    proxy.web( req, res, { target: 'http://cloud.datacenter.es.gov.br.local/v1/projects/1a4680' } );
+    proxy.web( req, res, { target: config.targetUrl } );
 } );
 
 let pathApp = express();
