@@ -15,7 +15,33 @@ let app = express();
 const proxy = httpProxy.createProxyServer( {} );
 
 app.use( ( req, res ) => {
+    console.log( req );
     proxy.web( req, res, { target: config.targetUrl } );
+} );
+
+// development error handler
+// will print full error
+if ( config.env === 'development' ) {
+    app.use( ( err, req, res, next ) => {
+        res.status( err.status || 500 );
+        console.log( err );
+        res.json(
+            {
+                err: err.message,
+                stack: err.stack
+            } );
+    } );
+}
+
+// production error handler
+// only error message leaked to user
+app.use( ( err, req, res, next ) => {
+    res.status( err.status || 500 );
+    console.log( err.stack );
+    res.json( {
+        err: err.message,
+        fields: []
+    } );
 } );
 
 let pathApp = express();
