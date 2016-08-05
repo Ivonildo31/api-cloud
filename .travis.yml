@@ -8,6 +8,6 @@ script:
   docker build -t $DOCKER_IMAGE .
 deploy:
   provider: script
-  script: ./travis
+  script: travis.sh
   on:
     branch: master
