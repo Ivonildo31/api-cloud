@@ -8,6 +8,7 @@ script:
   docker build -t $DOCKER_IMAGE .
 deploy:
   provider: script
+  skip_cleanup: true
   script: travis.sh
   on:
     branch: master
