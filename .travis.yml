@@ -6,6 +6,12 @@ script:
   docker build -t prodest/api-cloud .
 deploy:
   provider: script
-  script: docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" && docker push prodest/api-cloud
+  script: ./deploy prodest/api-cloud
+  commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push prodest/api-cloud
+      - (git clone https://github.com/prodest/gerencio-upgrade)
+      - (cd gerencio-upgrade && npm install)
+      - (cd gerencio-upgrade && node ./gerencio-upgrade $SERVICENAME 40000)
   on:
     branch: master
