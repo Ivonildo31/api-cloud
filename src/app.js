@@ -1,4 +1,5 @@
 const config = require( './config/app' );
+const upgrade = require( 'gerencio-upgrade' );
 
 if ( config.env === 'production' ) {
     require( 'newrelic' );
@@ -6,17 +7,40 @@ if ( config.env === 'production' ) {
 
 const express = require( 'express' );
 const httpProxy = require( 'http-proxy' );
+const bodyParser = require( 'body-parser' );
 
 let app = express();
+
 
 //
 // Create a proxy server with custom application logic
 //
 const proxy = httpProxy.createProxyServer( {} );
 
+// app.use( bodyParser.json( { limit: '50mb' } ) );
+// app.use( bodyParser.urlencoded( { extended: false } ) );
+
 app.use( ( req, res ) => {
-    console.log( req );
-    proxy.web( req, res, { target: config.targetUrl } );
+
+    // const serviceName = req.body.serviceName;
+    // const interval = req.body.interval;
+    // const rancherUrl = req.body.rancherUrl;
+    // const rancherAccessKey = req.body.rancherAccessKey;
+    // const rancherSecretKey = req.body.rancherSecretKey;
+    // const rancherStack = req.body.rancherStack;
+    // const rancherComposeUrl = req.body.rancherComposeUrl;
+
+    // upgrade( serviceName, interval, rancherUrl, rancherAccessKey, rancherSecretKey, rancherStack, rancherComposeUrl )
+    // .then( () => {
+    //     res.send( 'ok' );
+    // } )
+    // .catch( err => {
+    //     res.status( 500 ).send( err.message );
+    // } );
+
+    console.log( req.originalUrl, req.method );
+    proxy.web( req, res, { target: config.targetUrl, toProxy: true } );
+    //console.log( res );
 } );
 
 // development error handler
@@ -50,3 +74,5 @@ const path = config.path;
 pathApp.use( path, app );
 
 module.exports = pathApp;
+
+
