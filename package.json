@@ -16,8 +16,10 @@
   },
   "homepage": "https://github.com/alvarollmenezes/base-nodejs-api#readme",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "debug": "^2.2.0",
     "express": "^4.14.0",
+    "gerencio-upgrade": "git+https://git@github.com/prodest/gerencio-upgrade.git",
     "http-proxy": "^1.14.0",
     "newrelic": "^1.28.1"
   },
