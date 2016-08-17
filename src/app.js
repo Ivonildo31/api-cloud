@@ -1,46 +1,98 @@
 const config = require( './config/app' );
-const upgrade = require( 'gerencio-upgrade' );
-
 if ( config.env === 'production' ) {
     require( 'newrelic' );
 }
 
 const express = require( 'express' );
-const httpProxy = require( 'http-proxy' );
 const bodyParser = require( 'body-parser' );
+const upgrade = require( 'gerencio-upgrade' );
+const uuid = require( 'uuid' );
 
 let app = express();
 
+app.use( bodyParser.json( { limit: '5mb' } ) );
+app.use( bodyParser.urlencoded( { extended: false } ) );
 
-//
-// Create a proxy server with custom application logic
-//
-const proxy = httpProxy.createProxyServer( {} );
+const status = {};
 
-// app.use( bodyParser.json( { limit: '50mb' } ) );
-// app.use( bodyParser.urlencoded( { extended: false } ) );
+function clearOldStatus() {
+    for ( let key in status ) {
+        const time = status[ key ].start.setHours( status[ key ].start.getHours() + 1 );
 
-app.use( ( req, res ) => {
+        if ( time < new Date() ) {
+            delete status[ key ];
+        }
+    }
+}
 
-    // const serviceName = req.body.serviceName;
-    // const interval = req.body.interval;
-    // const rancherUrl = req.body.rancherUrl;
-    // const rancherAccessKey = req.body.rancherAccessKey;
-    // const rancherSecretKey = req.body.rancherSecretKey;
-    // const rancherStack = req.body.rancherStack;
-    // const rancherComposeUrl = req.body.rancherComposeUrl;
+app.post( '/upgrade', ( req, res, next ) => {
 
-    // upgrade( serviceName, interval, rancherUrl, rancherAccessKey, rancherSecretKey, rancherStack, rancherComposeUrl )
-    // .then( () => {
-    //     res.send( 'ok' );
-    // } )
-    // .catch( err => {
-    //     res.status( 500 ).send( err.message );
-    // } );
+    clearOldStatus();
 
-    console.log( req.originalUrl, req.method );
-    proxy.web( req, res, { target: config.targetUrl, toProxy: true } );
-    //console.log( res );
+    const serviceName = req.body.serviceName;
+    const interval = req.body.interval;
+    const rancherUrl = req.body.rancherUrl;
+    const rancherAccessKey = req.body.rancherAccessKey;
+    const rancherSecretKey = req.body.rancherSecretKey;
+    const rancherStack = req.body.rancherStack;
+    const rancherComposeUrl = req.body.rancherComposeUrl;
+
+    const id = uuid.v4();
+
+    status[ id ] = {
+        finished: false,
+        success: null,
+        result: null,
+        start: new Date()
+    };
+
+    try {
+        upgrade( serviceName, interval, rancherUrl, rancherAccessKey, rancherSecretKey, rancherStack, rancherComposeUrl )
+        .then( ( result ) => {
+            status[ id ].finished = true;
+            status[ id ].success = true;
+            status[ id ].result = result;
+        } )
+        .catch( err => {
+            console.error( err );
+
+            status[ id ].finished = true;
+            status[ id ].success = false;
+            if ( err.message ) {
+                status[ id ].result = err.message;
+            } else {
+                status[ id ].result = err;
+            }
+        } );
+
+        res.send( id );
+    } catch ( err ) {
+        next( err );
+    }
+} );
+
+app.get( '/status/:id', ( req, res, next ) => {
+    try {
+        const id = req.params.id;
+        const idStatus = status[ id ];
+
+        if ( idStatus.finished ) {
+            delete status[ id ];
+        }
+
+        res.json( idStatus );
+    } catch ( err ) {
+        next( err );
+    }
+} );
+
+// error handlers
+
+// // catch 404 and forward to error handler
+app.use( ( req, res, next ) => {
+    var err = new Error( 'Not Found' );
+    err.status = 404;
+    next( err );
 } );
 
 // development error handler
@@ -74,5 +126,3 @@ const path = config.path;
 pathApp.use( path, app );
 
 module.exports = pathApp;
-
-

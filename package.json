@@ -21,7 +21,8 @@
     "express": "^4.14.0",
     "gerencio-upgrade": "git+https://git@github.com/prodest/gerencio-upgrade.git",
     "http-proxy": "^1.14.0",
-    "newrelic": "^1.28.1"
+    "newrelic": "^1.28.1",
+    "uuid": "^2.0.2"
   },
   "devDependencies": {
     "eslint-config-prodest": "^1.0.12"
