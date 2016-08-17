@@ -1,5 +1,8 @@
 FROM mhart/alpine-node:6.2.1
 
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh
+
 # add project to build
 COPY src /root/api/src
 COPY package.json /root/api/package.json
