@@ -41,3 +41,7 @@ jspm_packages
 
 # Typings
 typings/
+
+#rancher & docker
+rancher-compose*
+docker-compose*
